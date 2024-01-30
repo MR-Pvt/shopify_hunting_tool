@@ -90,15 +90,12 @@ def main_run(store_link):
     print(store_link)
     
 
-    chrome_options = uc.ChromeOptions()
-    # options.add_argument("--incognito")
-    chrome_options.add_argument("--disable-web-security")
-    chrome_options.add_argument('--disable-popup-blocking')
-    chrome_options.add_argument('--headless')
-    executable_path = r'G:\work\test\shopify sales scraper\website\shopify_hunter\website\res\GoogleChromePortable107\GoogleChromePortable.exe'
-    print("=> Starting Chrome Browser\n")
-    driver = uc.Chrome(version_main = 107,options=chrome_options,use_subprocess=True,browser_executable_path=executable_path)     
-    driver.maximize_window()
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--disable-gpu")
+    driver = webdriver.Chrome(options=chrome_options)
+
 
 
     # Set up Chrome options if needed
@@ -114,7 +111,7 @@ def main_run(store_link):
 
 
     # Maximize the browser window
-    # driver.maximize_window()
+    driver.maximize_window()
 
     # Navigate to the website
     website_url = 'https://app.shophunter.io/login'
