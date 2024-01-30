@@ -43,7 +43,6 @@ import httpx
 from datetime import datetime, timedelta
 from io import BytesIO
 from PIL import Image 
-import undetected_chromedriver as uc
 
 
 def Get_Store_ID(url):
