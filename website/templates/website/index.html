@@ -1,0 +1,550 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">    
+    <title>Shopify Hunter</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'website/css/index.css' %}">
+    <!-- Add this to your HTML file -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+30JU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+  
+</head>
+
+<style>
+  @font-face {
+            font-family: 'myFirstFont';
+            src: url("{% static 'website/fonts/ColorTube-Regular.otf' %}");
+        }
+
+    
+        body {
+            font-family: 'myFirstFont', sans-serif;
+        }
+</style>
+
+<body>
+    <!-- <form> -->
+        <div class="segment" id="upperbox">
+        <img src="{% static 'website/images/logo2.png' %}" alt="logo" class="image_logo">
+          <h1 id="seghead">SHOPIFY HUNTER</h1>
+        </div>
+
+        <button class="backbutton" id="backbutton" type="button">BACK</button>
+        
+        <form id="post-form">
+          {% csrf_token %}
+          <label>
+          <input id="linkbox" type="url" placeholder="Enter Shopify Link..."/>
+          </label>
+          <button class="red" id="loginButton" type="submit">GET REPORT</button>
+
+        </form>
+        
+        <div id="dot" class="dot-spin"></div>
+
+        <div class="segment segment_detail hidding1">
+          <div class="detail_boxes"><h1><i class="fa fa-dollar" style="font-size:24px "></i> Total Sales</h1><br>
+              <h1 class="innerheading" id="total_sales">$11,742</h1></div>
+          <div class="detail_boxes"><h1><i class="fa fa-shopping-bag" style="font-size:24px "></i> Total Orders</h1><br>
+              <h1 class="innerheading" id="total_orders">42</h1></div>
+          <div class="detail_boxes"><h1><i class="fa fa-archive" style="font-size:24px "></i> AOV</h1><br>
+              <h1 class="innerheading" id="aov">$214.44</h1></div>
+          <div class="detail_boxes"><h1><i class="fa fa-archive" style="font-size:24px "></i> SKUs</h1><br>
+              <h1 class="innerheading" id="skus">485</h1></div>
+        </div>
+
+      <!-- <div class="middle_box"> -->
+        <div class="segment segment_detail hidding2" style="padding-top: 20px;">
+          <div class="detail_boxes graphs" id="graphImage"></div>
+          <div class="segment_dwm">
+            <div class="dwm" id="day">Day</div>
+            <div class="dwm" id="week">Week</div>
+            <div class="dwm" id="month">Month</div>
+          </div>
+        </div>
+      <!-- </div> -->
+
+        <div class="segment image_boxes container hidding">
+            <h1 style="    margin: unset;
+            margin-top: 20px;
+            font-size: 2rem;">Top Performing Products</h1>
+
+            <div class="row" id="product-container">
+            </div>
+              </div>
+        
+      <!-- </form> -->
+      <script src="{% static 'website/js/index.js' %}"></script>
+        
+      <script type="text/javascript">
+
+        $(document).on('submit', '#post-form', function(e) {
+
+            // Get the dot element
+            var dot = document.getElementById('dot');
+      
+            // Change the display property to block
+            dot.style.display = 'block';
+
+
+          e.preventDefault();
+          $.ajax({
+            type: 'POST',
+            url: '/get_report/',
+            data:{
+              store_link: $('#linkbox').val(),
+              csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+            },
+            success: function(data){
+
+              var day_lst = data['day_lst'];
+              var week_lst = data['week_lst'];
+              var month_lst = data['month_lst'];
+              const graph_image = data.day_image;
+              const week_graph_image = data.week_image;
+              const month_graph_image = data.month_image;
+
+              var title_lst = data['title_lst'];
+              var price_lst= data['price_lst'];
+              var ads_lst = data['ads_lst'];
+              var revenue_lst = data['revenue_lst'];
+              var rank_lst = data['rank_lst'];
+              var velocity_lst = data['velocity_lst'];
+              var created_lst = data['created_lst'];
+              var plink_lst = data['plink_lst'];
+              var img_lst = data['img_lst'];
+              var product_status_lst = data['product_status_lst'];
+
+
+              console.log(data['day_lst']);
+              console.log('me graph hoon...',graph_image);
+
+        
+
+            hunted(day_lst,week_lst,month_lst,graph_image, week_graph_image,
+            month_graph_image, title_lst, price_lst, ads_lst, revenue_lst,
+            rank_lst, velocity_lst, created_lst, plink_lst, img_lst, product_status_lst);
+  
+
+
+
+            }
+            
+          })
+
+        });
+
+
+
+
+        document.getElementById('backbutton').addEventListener('click', function(){
+
+
+      
+          $.ajax({
+            type: 'POST',
+            url: '/remove_all_products/',
+            data:{
+              csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+            },
+            success: function(data){
+
+              console.log(data)
+
+            }
+            
+          })
+
+       
+        var bb = document.getElementById('backbutton');
+        bb.style.display = 'none';
+
+        // var hideboxes = document.getElementsByClassName('hidding');
+
+        // for (var i = 0; i < hideboxes.length; i++) {
+        //     hideboxes[i].style.display = 'none';
+        // }
+
+        var upperbox = document.getElementsByClassName('hidding1')[0];
+        upperbox.style.display = 'none';
+
+        var myImage = document.getElementsByClassName('image_logo')[0];
+        myImage.style.width = '200px';
+
+        var segbox = document.getElementById('upperbox');
+        // var segbox = document.getElementsByClassName('segment')[0];
+        segbox.style.padding = '4vw 0';
+        segbox.style.fontSize = 'unset';
+
+        var segbox = document.getElementById('seghead');
+        segbox.style.fontSize = '0.8em !important';
+
+        var linkbox = document.getElementById('linkbox');
+        linkbox.style.display = 'block';
+
+        var loginButton = document.getElementById('loginButton');
+        loginButton.style.display = 'block';
+
+        var hideboxes = document.getElementsByClassName('hidding')[0];
+        hideboxes.style.display = 'none';
+
+        var hideboxes2 = document.getElementsByClassName('hidding2')[0];
+        hideboxes2.style.display = 'none';
+        // for (var i = 0; i < hideboxes.length; i++) {
+        //     hideboxes[i].style.display = 'none';
+        // }
+
+        var upperbox = document.getElementsByClassName('hidding1')[0];
+        upperbox.style.display = 'none';
+        // var seghead = document.getElementById('seghead');
+        // segbox.style.fontSize = '0.8em';
+
+
+        
+          
+
+        });
+
+
+
+        function hunted(day_lst,week_lst,month_lst,graph_image, week_graph_image,
+            month_graph_image, title_lst, price_lst, ads_lst, revenue_lst,
+            rank_lst, velocity_lst, created_lst, plink_lst, img_lst, product_status_lst) {
+
+        // Get data from the input field
+        var inputData = document.getElementById('linkbox').value;
+
+        // Your function code goes here
+        dot.style.display = 'none';
+
+        var myImage = document.getElementsByClassName('image_logo')[0];
+        myImage.style.width = '90px';
+
+        var segbox = document.getElementById('upperbox');
+        // var segbox = document.getElementsByClassName('segment')[0];
+        segbox.style.padding = '0.1vw 0';
+        segbox.style.fontSize = '1.5rem !important;';
+
+
+
+        var bb = document.getElementById('backbutton');
+        bb.style.display = 'block';
+
+        var linkbox = document.getElementById('linkbox');
+        linkbox.style.display = 'none';
+
+        var loginButton = document.getElementById('loginButton');
+        loginButton.style.display = 'none';
+
+        var hideboxes = document.getElementsByClassName('hidding')[0];
+        hideboxes.style.display = 'block';
+
+        var hideboxes2 = document.getElementsByClassName('hidding2')[0];
+        hideboxes2.style.display = 'flex';
+
+        var upperbox = document.getElementsByClassName('hidding1')[0];
+        upperbox.style.display = 'inline flex';
+        // var seghead = document.getElementById('seghead');
+        // segbox.style.fontSize = '0.8em';
+
+
+              // Get the h1 element by its id
+              var total_sales = document.getElementById("total_sales");
+              var total_orders = document.getElementById("total_orders");
+              var aov = document.getElementById("aov");
+              var skus = document.getElementById("skus");
+              // const graphImage = document.getElementById('gimage');
+              // console.log('me image container hn...',graphImage);
+
+
+                  // Create a new image element
+              var imgElement = $('<img>', {
+                  id: 'dynamicImage', // Set the ID for the image element
+                  src: graph_image, // Set the source URL for the image
+              });
+
+              // Append the image element to the existing div with the id 'imageContainer'
+              $('#graphImage').append(imgElement);
+
+
+              // Check if the element exists
+              if (total_sales && total_orders && aov && skus) {
+                  // Change the content of the h1 element
+                  total_sales.innerHTML = day_lst[0];
+                  total_orders.innerHTML = day_lst[1];
+                  aov.innerHTML = day_lst[2];
+                  skus.innerHTML = day_lst[3];
+                  
+
+              } else {
+                  console.error("Element with id 'myHeading' not found");
+              }
+
+
+          // Given lists
+          // const title_lst = ["Product 1", "Product 2", "Product 3", "Product 4", "Product 5", "Product 6", "Product 7", "Product 8"];
+          // const price_lst = ["$19.99", "$29.99", "$39.99", "$49.99", "$59.99", "$69.99", "$79.99", "$89.99"];
+          // const ads_lst = ["Ad details 1", "Ad details 2", "Ad details 3", "Ad details 4", "Ad details 5", "Ad details 6", "Ad details 7", "Ad details 8"];
+          // const revenue_lst = ["$1000", "$1500", "$2000", "$2500", "$3000", "$3500", "$4000", "$4500"];
+          // const rank_lst = ["#1", "#2", "#3", "#4", "#5", "#6", "#7", "#8"];
+          // const velocity_lst = ["High", "Medium", "Low", "High", "Medium", "Low", "High", "Medium"];
+          // const created_lst = ["2022-01-01", "2022-01-15", "2022-02-01", "2022-02-15", "2022-03-01", "2022-03-15", "2022-04-01", "2022-04-15"];
+          // const plink_lst = ["#product1", "#product2", "#product3", "#product4", "#product5", "#product6", "#product7", "#product8"];
+          // const img_lst = ["./images/p1.jpeg", "./images/p2.jpeg", "./images/p3.jpeg", "./images/p4.jpeg", "./images/p5.jpeg", "./images/p6.jpeg", "./images/p7.jpeg", "./images/p8.jpeg"];
+          // const product_status_lst = ["In Stock", "Out of Stock", "In Stock", "Out of Stock", "In Stock", "Out of Stock", "In Stock", "Out of Stock"];
+
+          // Function to create a product card
+          function createProductCard(title, price, ads, revenue, rank, velocity, created, plink, img, product_status) {
+              const col = document.createElement("div");
+              col.className = "col-sm-3";
+
+              const boxContainer = document.createElement("div");
+              boxContainer.className = "box-container";
+
+              const boxImg = document.createElement("div");
+              boxImg.className = "box-img";
+              const imgElement = document.createElement("img");
+              imgElement.src = img;
+              boxImg.appendChild(imgElement);
+
+              const titleElement = document.createElement("h4");
+              titleElement.className = "box-title";
+              titleElement.textContent = title;
+
+              const detailsContainer = document.createElement("div");
+              detailsContainer.className = "product-details";
+
+              const priceElement = createDetailElement("Price", price);
+              const adsElement = createDetailElement("Ads", ads);
+              const revenueElement = createDetailElement("Revenue", revenue);
+              const rankElement = createDetailElement("Rank", rank);
+              const velocityElement = createDetailElement("Velocity", velocity);
+              const createdElement = createDetailElement("Created", created);
+              const statusElement = createDetailElement("Status", product_status);
+
+              const productLinkElement = document.createElement("a");
+              productLinkElement.href = plink;
+              productLinkElement.textContent = "Product Link";
+
+              detailsContainer.appendChild(priceElement);
+              detailsContainer.appendChild(adsElement);
+              detailsContainer.appendChild(revenueElement);
+              detailsContainer.appendChild(rankElement);
+              detailsContainer.appendChild(velocityElement);
+              detailsContainer.appendChild(createdElement);
+              detailsContainer.appendChild(productLinkElement);
+              detailsContainer.appendChild(statusElement);
+
+              boxContainer.appendChild(boxImg);
+              boxContainer.appendChild(titleElement);
+              boxContainer.appendChild(detailsContainer);
+
+              col.appendChild(boxContainer);
+
+              return col;
+          }
+
+          // Function to create a detail element
+          function createDetailElement(label, value) {
+              const detailElement = document.createElement("div");
+              detailElement.className = "product-detail";
+              const labelElement = document.createElement("span");
+              labelElement.className = "detail-label";
+              labelElement.textContent = `${label}: `;
+              const valueElement = document.createElement("span");
+              valueElement.className = "detail-value";
+              valueElement.textContent = value;
+
+              detailElement.appendChild(labelElement);
+              detailElement.appendChild(valueElement);
+
+              return detailElement;
+          }
+
+          // Function to append product cards to the container
+          function appendProductCards(containerId, titles, prices, ads, revenues, ranks, velocities, created, plinks, imgs, statuses) {
+              const container = document.getElementById(containerId);
+
+              if (container) {
+                  for (let i = 0; i < titles.length; i++) {
+                      const productCard = createProductCard(
+                          titles[i],
+                          prices[i],
+                          ads[i],
+                          revenues[i],
+                          ranks[i],
+                          velocities[i],
+                          created[i],
+                          plinks[i],
+                          imgs[i],
+                          statuses[i]
+                      );
+                      container.appendChild(productCard);
+                  }
+              } else {
+                  console.error(`Container with id '${containerId}' not found.`);
+              }
+          }
+
+          // Call the function to append product cards to the container
+          appendProductCards(
+              "product-container",
+              title_lst,
+              price_lst,
+              ads_lst,
+              revenue_lst,
+              rank_lst,
+              velocity_lst,
+              created_lst,
+              plink_lst,
+              img_lst,
+              product_status_lst
+          );
+
+
+
+
+
+        // day_f();
+
+        function day_f(){
+
+          // Getting Variables
+
+          var day_shadow = document.getElementById('day');
+          var week_shadow = document.getElementById('week');
+          var month_shadow = document.getElementById('month');
+          var graphImage = document.getElementById('graphImage');
+
+          var aov = document.getElementById('aov');
+          var skus = document.getElementById('skus');
+          var saless = document.getElementById('total_sales');
+          var orderss = document.getElementById('total_orders');
+
+
+          // Changing CSS
+
+          day_shadow.style.color = "#9eb44e"
+          week_shadow.style.color = "#3f374bed"
+          month_shadow.style.color = "#3f374bed"
+
+          day_shadow.style.boxShadow = "inset 1px 1px 2px #babecc, inset -1px -1px 2px #fff";
+          week_shadow.style.boxShadow = "-5px -5px 20px #fff, 5px 5px 20px #babecc";
+          month_shadow.style.boxShadow = "-5px -5px 20px #fff, 5px 5px 20px #babecc";
+
+
+          // Changing Image
+
+          graphImage.src = graph_image;
+
+          // Changing Values:
+
+          aov.innerText = day_lst[2];
+          skus.innerText = day_lst[3];
+          saless.innerText = day_lst[0];
+          orderss.innerText = day_lst[1];
+
+          };
+
+          function week_f(){
+          // Getting Variables
+
+          var day_shadow = document.getElementById('day');
+          var week_shadow = document.getElementById('week');
+          var month_shadow = document.getElementById('month');
+          var graphImage = document.getElementById('graphImage');
+
+          var aov = document.getElementById('aov');
+          var skus = document.getElementById('skus');
+          var saless = document.getElementById('total_sales');
+          var orderss = document.getElementById('total_orders');
+
+
+          // Changing CSS
+
+          week_shadow.style.color = "#9eb44e"
+          day_shadow.style.color = "#3f374bed"
+          month_shadow.style.color = "#3f374bed"
+
+          week_shadow.style.boxShadow = "inset 1px 1px 2px #babecc, inset -1px -1px 2px #fff";
+          day_shadow.style.boxShadow = "-5px -5px 20px #fff, 5px 5px 20px #babecc";
+          month_shadow.style.boxShadow = "-5px -5px 20px #fff, 5px 5px 20px #babecc";
+
+          // Changing Values:
+          graphImage.src = week_graph_image;
+          aov.innerText = week_lst[2];
+          skus.innerText = week_lst[3];
+          saless.innerText = week_lst[0];
+          orderss.innerText = week_lst[1];
+
+          }
+
+          function month_f(){
+          // Getting Variables
+
+          var day_shadow = document.getElementById('day');
+          var week_shadow = document.getElementById('week');
+          var month_shadow = document.getElementById('month');
+          var graphImage = document.getElementById('graphImage');
+
+          var aov = document.getElementById('aov');
+          var skus = document.getElementById('skus');
+          var saless = document.getElementById('total_sales');
+          var orderss = document.getElementById('total_orders');
+
+
+          // Changing CSS
+
+          month_shadow.style.color = "#9eb44e"
+          day_shadow.style.color = "#3f374bed"
+          week_shadow.style.color = "#3f374bed"
+
+          month_shadow.style.boxShadow = "inset 1px 1px 2px #babecc, inset -1px -1px 2px #fff";
+          week_shadow.style.boxShadow = "-5px -5px 20px #fff, 5px 5px 20px #babecc";
+          day_shadow.style.boxShadow = "-5px -5px 20px #fff, 5px 5px 20px #babecc";
+
+          // Changing Values:
+          graphImage.src = month_graph_image;
+          console.log(month_lst[0],month_lst[0]);
+          aov.innerText = month_lst[2];
+          skus.innerText = month_lst[3];
+          saless.innerText = month_lst[0];
+          orderss.innerText = month_lst[1];
+          }
+
+
+          document.getElementById('day').addEventListener('click', function(){
+          day_f()
+          });
+
+          document.getElementById('week').addEventListener('click', function(){
+          week_f()
+          });
+
+          document.getElementById('month').addEventListener('click', function(){
+          month_f()
+          });
+
+
+
+        }
+
+
+
+
+        
+
+      </script>
+
+
+
+
+</body>
+</html>
